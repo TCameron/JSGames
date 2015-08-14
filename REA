@@ -1,0 +1,37 @@
+README:
+
+Thanks for playing my game! It was created in HTML 5 canvas and Javascript.
+Included is a library called Victor.js, which I did not write.
+
+Running the game:
+Open shootergame.html
+
+Rules:
+You get 3 lives. You lose a life upon touching an enemy.
+You can dodge enemies for 10 points each, or shoot them for 100 points.
+See how many points you can rack up!
+There is a pacifist score which is obtained if you never shoot an enemy.
+
+Controls are as follows:
+Arrows, WASD, Mouse: Move
+J, Left Click: Fire regular shot
+K, Middle Click: Use alternate ability
+Esc: Pause and Unpause game
+R: Restart game
+
+Currently, there are a missile and a shield ship.
+You have to manually edit the source code to switch between them.
+On line 49, change:
+
+var shipAbility = 1;
+
+to
+
+var shipAbility = 2;
+
+1 is missile (The shot will penetrate enemies and give triple points)
+2 is shield (Your ship will not blow up on contact, enemies will)
+
+More features to come soon!
+
+- Timothy Cameron, 8/13/2015
