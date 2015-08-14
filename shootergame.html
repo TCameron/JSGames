@@ -5,7 +5,7 @@
 <body>
 
 <canvas id="canvas" width="300" height="300">
-Your browser does not support canvas. :c
+Your browser does not support canvas.
 </canvas>
 
 <script src="./build/victor.js"></script>
@@ -80,7 +80,9 @@ var bulletcolor = "#0000FF";
 var textcolor = "#00FF00";
 var altcolor = "#FF00FF";
 
-//Initializes the game
+  /**
+   * Initializes the game
+   */
 function init(){
 	ctx = canvas.getContext("2d");
 	WIDTH = canvas.width;
@@ -102,7 +104,12 @@ function init(){
 	intervalId = setInterval(draw, 5);
 }
 
-//Drawing functions
+  /**
+   * Draws a circle
+   * @param {number} x - x position to draw at
+   * @param {number} y - y position to draw at
+   * @param {number} r - radius of circle
+   */
 function circle(x, y, r){
 	ctx.beginPath();
 	ctx.arc(x, y, r, 0, Math.PI*2, true);
@@ -110,6 +117,13 @@ function circle(x, y, r){
 	ctx.fill();
 }
 
+  /**
+   * Draws a circle
+   * @param {number} x - x position to draw at
+   * @param {number} y - y position to draw at
+   * @param {number} w - width of rectangle
+   * @param {number} h - height of rectangle
+   */
 function rect(x, y, w, h){
 	ctx.beginPath();
 	ctx.rect(x, y, w, h);
@@ -117,25 +131,34 @@ function rect(x, y, w, h){
 	ctx.fill();
 }
 
+  /**
+   * Clears the board
+   */
 function clear(){
 	ctx.clearRect(0, 0, WIDTH, HEIGHT);
 	rect(0,0,WIDTH,HEIGHT);
 }
 
+  /**
+   * Spawns an enemy and inserts into the array
+   */
 function spawnEnemy(){
 	var ene = new Victor(0, 0);
 	ene.randomizeX(new Victor(0, 0), new Victor(WIDTH, 0));
 	enemyList.push(ene);
 }
 
-//Ship actions
+  /**
+   * Shoots a bullet and inserts into the array
+   */
 function fire(){
 	var bul = new Victor(shipx, shipy);
 	bulletList.push(bul);
 }
 
-//Alternate abilities:
-//1 fires spread bullet, 2 is a shield
+  /**
+   * Alternate abilities: 1 fires missile, 2 is a shield
+   */
 function alt(){
 	if (altCount > ALTINTERVAL){
 		switch (shipAbility){
@@ -150,7 +173,10 @@ function alt(){
 	}
 }
 
-//Keyboard controls
+  /**
+   * Changes a variable according to key pressed
+   * @param {Event} event
+   */
 function onKeyDown(evt){
 	switch (evt.keyCode){
 		case 37:
@@ -184,6 +210,10 @@ function onKeyDown(evt){
 	}
 }
 
+  /**
+   * Changes a variable according to key let go
+   * @param {Event} event
+   */
 function onKeyUp(evt){
 	switch (evt.keyCode){
 		case 37:
@@ -217,7 +247,10 @@ function onKeyUp(evt){
 window.addEventListener('keydown',onKeyDown,true);
 window.addEventListener('keyup',onKeyUp,true);
 
-//Mouse Movement
+  /**
+   * Allows the player to move ship with full mouse control
+   * @param {Event} event
+   */
 function onMouseMove(evt){
 	if (evt.pageX > canvasMinX && evt.pageX < canvasMaxX) {
 		shipx = Math.max(evt.pageX - canvasMinX - (shipw/2),0);
@@ -229,27 +262,26 @@ function onMouseMove(evt){
 	}
 }
 
-//Use mouse controls for game
+  /**
+   * Shoots or activates alternate ability using mouse clicks
+   * @param {Event} event
+   */
 function onMouseClick(evt){
-	if (evt.which == 1){
+	if (evt.which == 1)
 		shootDown = true;
-		console.log("shooting");
-	}
-	if (evt.which == 2){
+	if (evt.which == 2)
 		altDown = true;
-		console.log("alting");
-	}
 }
 
+  /**
+   * Stops shooting or ability when mouse click is released
+   * @param {Event} event
+   */
 function onMouseRelease(evt){
-	if (evt.which == 1){
+	if (evt.which == 1)
 		shootDown = false;
-		console.log("done shooting");
-	}
-	if (evt.which == 2){
+	if (evt.which == 2)
 		altDown = false;
-		console.log("done alting");
-	}
 }
 
 window.addEventListener('mousemove', function(e) {
@@ -259,7 +291,9 @@ window.addEventListener('mousedown', function(e){
 	onMouseClick(e);
 });
 
-//Main function that gets looped in interval
+  /**
+   * The main loop which controls most of the action and rendering
+   */
 function draw(){
 	ctx.fillStyle = backcolor;
 	clear();
