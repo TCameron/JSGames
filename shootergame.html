@@ -1,0 +1,443 @@
+<!Made by Timothy Cameron, 8/13/2015>
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvas" width="300" height="300">
+Your browser does not support canvas. :c
+</canvas>
+
+<script src="./build/victor.js"></script>
+<script>
+
+//Globals
+var canvas = document.getElementById('canvas');
+var ctx;
+var x = 25;
+var y = 250;
+var WIDTH;
+var HEIGHT;
+
+//Controls (Arrows, WASD, JK, Left & Middle click, Esc, R)
+var rightDown = false;
+var leftDown = false;
+var upDown = false;
+var downDown = false;
+var shootDown = false;
+var altDown = false;
+var pause = false;
+var restart = false;
+
+//Ship
+var shipx;
+var shipy;
+var shipw = 10;
+var shiph = 10;
+var score;
+var lives;
+
+//Bullets
+var bulw = 5;
+var bulh = 5;
+var bdy = -1;
+var bdx = 0;
+var bulCount;
+var BULLETINTERVAL = 50;
+var bulletList;
+var pacifist;
+
+//Alt
+var shipAbility = 1;
+var altCount = 0;
+var altDuration = 0;
+var ALTMAX = 500;
+var ALTINTERVAL = 1000;
+var shield = false;
+var altWeap;
+
+//Enemies
+var enew = 50;
+var eneh = 50;
+var edy = 1;
+var edx = 0;
+var eneCount;
+var ENEINTERVAL = 100;
+var enemyList;
+
+//Drawing
+var canvasMinX = 0;
+var canvasMaxX = 0;
+var canvasMinY = 0;
+var canvasMaxY = 0;
+var intervalId = 0;
+
+//Colors
+var backcolor = "#FFFFFF";
+var shipcolor = "#000000";
+var enemycolor = "#FF0000";
+var bulletcolor = "#0000FF";
+var textcolor = "#00FF00";
+var altcolor = "#FF00FF";
+
+//Initializes the game
+function init(){
+	ctx = canvas.getContext("2d");
+	WIDTH = canvas.width;
+	HEIGHT = canvas.height;
+	shipx = WIDTH / 2;
+	shipy = HEIGHT / 1.2;
+	canvasMinX = canvas.offsetLeft;
+	canvasMaxX = canvasMinX + WIDTH;
+	canvasMinY = canvas.offsetTop;
+	canvasMaxY = canvasMinY + HEIGHT;
+	enemyList = [];
+	bulletList = [];
+	score = 0;
+	lives = 3;
+	eneCount = 0;
+	bulCount = 0;
+	altCount = 0;
+	pacifist = true;
+	intervalId = setInterval(draw, 5);
+}
+
+//Drawing functions
+function circle(x, y, r){
+	ctx.beginPath();
+	ctx.arc(x, y, r, 0, Math.PI*2, true);
+	ctx.closePath();
+	ctx.fill();
+}
+
+function rect(x, y, w, h){
+	ctx.beginPath();
+	ctx.rect(x, y, w, h);
+	ctx.closePath();
+	ctx.fill();
+}
+
+function clear(){
+	ctx.clearRect(0, 0, WIDTH, HEIGHT);
+	rect(0,0,WIDTH,HEIGHT);
+}
+
+function spawnEnemy(){
+	var ene = new Victor(0, 0);
+	ene.randomizeX(new Victor(0, 0), new Victor(WIDTH, 0));
+	enemyList.push(ene);
+}
+
+//Ship actions
+function fire(){
+	var bul = new Victor(shipx, shipy);
+	bulletList.push(bul);
+}
+
+//Alternate abilities:
+//1 fires spread bullet, 2 is a shield
+function alt(){
+	if (altCount > ALTINTERVAL){
+		switch (shipAbility){
+			case 1:
+				altWeap = new Victor(shipx, shipy);
+				break;
+			case 2:
+				shield = true;
+				break;
+		}
+		altCount = 0;
+	}
+}
+
+//Keyboard controls
+function onKeyDown(evt){
+	switch (evt.keyCode){
+		case 37:
+		case 65:
+			leftDown = true;
+			break;
+		case 38:
+		case 87:
+			upDown = true;
+			break;
+		case 39:
+		case 68:
+			rightDown = true;
+			break;
+		case 40:
+		case 83:
+			downDown = true;
+			break;
+		case 74:
+			shootDown = true;
+			break;
+		case 75:
+			altDown = true;
+			break;
+		case 82:
+			restart = true;
+			break;
+		case 27:
+			pause = !pause;
+			break;
+	}
+}
+
+function onKeyUp(evt){
+	switch (evt.keyCode){
+		case 37:
+		case 65:
+			leftDown = false;
+			break;
+		case 38:
+		case 87:
+			upDown = false;
+			break;
+		case 39:
+		case 68:
+			rightDown = false;
+			break;
+		case 40:
+		case 83:
+			downDown = false;
+			break;
+		case 74:
+			shootDown = false;
+			break;
+		case 82:
+			restart = false;
+			break;
+		case 75:
+			altDown = false;
+			break;
+	}
+}
+
+window.addEventListener('keydown',onKeyDown,true);
+window.addEventListener('keyup',onKeyUp,true);
+
+//Mouse Movement
+function onMouseMove(evt){
+	if (evt.pageX > canvasMinX && evt.pageX < canvasMaxX) {
+		shipx = Math.max(evt.pageX - canvasMinX - (shipw/2),0);
+		shipx = Math.min(WIDTH - shipw, shipx);
+	}
+	if (evt.pageY > canvasMinY && evt.pageY < canvasMaxX){
+		shipy = Math.max(evt.pageY - canvasMinY - (shiph/2),0);
+		shipy = Math.min(HEIGHT - shiph, shipy);
+	}
+}
+
+//Use mouse controls for game
+function onMouseClick(evt){
+	if (evt.which == 1){
+		shootDown = true;
+		console.log("shooting");
+	}
+	if (evt.which == 2){
+		altDown = true;
+		console.log("alting");
+	}
+}
+
+function onMouseRelease(evt){
+	if (evt.which == 1){
+		shootDown = false;
+		console.log("done shooting");
+	}
+	if (evt.which == 2){
+		altDown = false;
+		console.log("done alting");
+	}
+}
+
+window.addEventListener('mousemove', function(e) {
+	onMouseMove(e);
+});
+window.addEventListener('mousedown', function(e){
+	onMouseClick(e);
+});
+
+//Main function that gets looped in interval
+function draw(){
+	ctx.fillStyle = backcolor;
+	clear();
+
+	if(!pause){
+		//Move ship
+		if (rightDown && shipx < (WIDTH - shipw)) shipx += 3;
+		else if (leftDown && shipx > 0) shipx -= 3;
+		else if (upDown && shipy > 0) shipy -= 3;
+		else if (downDown && shipy < (HEIGHT - shiph)) shipy += 3;
+		if(shield)
+			ctx.fillStyle = altcolor;
+		else
+			ctx.fillStyle = shipcolor;
+		rect(shipx, shipy, shipw, shiph);
+
+		//Shoot a bullet. Bullets get put into an array.
+		//They are removed off screen.
+		if (shootDown && bulCount > BULLETINTERVAL){
+			fire();
+			bulCount = 0;
+		}
+		ctx.fillStyle = bulletcolor;
+		//Check if bullet is still on screen.
+		for (var i = 0; i < bulletList.length; i++){
+			bulletList[i].add(Victor(bdx, bdy));
+			if( bulletList[i].x >= 0 && bulletList[i].x < WIDTH && 
+				bulletList[i].y >= 0 && bulletList[i].y < HEIGHT)
+				rect(bulletList[i].x, bulletList[i].y, bulw, bulh);
+			else{
+				bulletList.splice(i,1);
+			}
+		}
+
+		//Alt Weapon checking
+		if(altWeap){
+			ctx.fillStyle = altcolor;
+			altWeap.add(Victor(bdx, bdy));
+			if (altWeap.x >= 0 && altWeap.x < WIDTH &&
+				altWeap.y >= 0 && altWeap.y < HEIGHT)
+				rect(altWeap.x, altWeap.y, bulw, bulh);
+			else
+				delete altWeap;
+		}
+
+		shootDown = false;
+		//console.log(bulletList);
+
+		//Spawn and move enemies. Enemies get put into an array.
+		//They are removed off screen and gain points for each one hit or avoided.
+		if (eneCount > ENEINTERVAL){
+			spawnEnemy();
+			eneCount = 0;
+		}
+		ctx.fillStyle = enemycolor;
+		for (var i = 0;i < enemyList.length;i++){
+			enemyList[i].add(Victor(edx, edy));
+			//Check if bullet hits enemy
+			for (var j = 0; j < bulletList.length;j++){
+				if (bulletList[j].x > enemyList[i].x && 
+					bulletList[j].x < enemyList[i].x + enew &&
+					bulletList[j].y > enemyList[i].y && 
+					bulletList[j].y < enemyList[i].y + eneh){
+					bulletList.splice(j,1);
+					enemyList.splice(i,1);
+					score += 100;
+					pacifist = false;
+					break;
+				}
+			}
+
+			//Check if Alt Weapon hits enemy
+			if(altWeap){
+				if (altWeap.x > enemyList[i].x && 
+					altWeap.x < enemyList[i].x + enew &&
+					altWeap.y > enemyList[i].y && 
+					altWeap.y < enemyList[i].y + eneh){
+					enemyList.splice(i,1);
+					score += 300;
+					pacifist = false;
+					break;
+				}
+			}
+
+			//Check if enemy hits player
+			if(shipx > enemyList[i].x &&
+				shipx < enemyList[i].x + enew && 
+				shipy > enemyList[i].y && 
+				shipy < enemyList[i].y + eneh){
+					if(!shield)
+						lives--;
+					enemyList.splice(i,1);
+					break;
+			}
+
+			//Check if enemy is still on screen.
+			if(enemyList[i].x >= 0 && enemyList[i].x < WIDTH && 
+				enemyList[i].y >= 0 && enemyList[i].y < HEIGHT)
+				rect(enemyList[i].x, enemyList[i].y, enew, eneh);
+			else{
+				enemyList.splice(i,1);
+				score += 10;
+			}
+		}
+		//console.log(enemyList);
+
+		//Use alt ability
+		if (altDown)
+			alt();
+
+		altDown = false;
+
+		//Draw the text
+		ctx.fillStyle = textcolor;
+		if (lives > 0){
+			//draw score
+			ctx.font = "15px arial";
+			ctx.textBaseline = "top";
+			ctx.textAlign = "left";
+			ctx.fillText("Score: " + score.toString(), 0, 0);
+
+			//draw lives
+			ctx.textBaseline="bottom";
+			ctx.fillText("Lives: " + lives.toString(), 0, 300);
+		}
+		else{
+			ctx.font = "15px arial";
+			ctx.textBaseline = "middle";
+			ctx.textAlign = "middle";
+			if (pacifist)
+				ctx.fillText("Pacifist Score: " +
+					score.toString(), WIDTH/2, HEIGHT/2);
+			else
+				ctx.fillText("Final Score: " + score.toString(), WIDTH/2, HEIGHT/2);
+			clearInterval(intervalId);
+		}
+
+		//Check for alt status
+		if(shield)
+			altCount = 0;
+		else{
+			altCount++;
+			if(altCount > ALTINTERVAL){
+				ctx.font = "15px arial";
+				ctx.textBaseline = "bottom";
+				ctx.textAlign = "right";
+				ctx.fillText("Alt", 300, 300);
+			}
+		}
+		if (altDuration < ALTMAX)
+			altDuration++;
+		else{
+			altDuration = 0;
+			shield = false;
+		}
+
+		eneCount++;
+		bulCount++;
+	}
+	else{
+		ctx.fillStyle = textcolor;
+		ctx.font = "15px arial";
+		ctx.textBaseline = "middle";
+		ctx.textAlign = "middle";
+		ctx.fillText("PAUSED", WIDTH/2, HEIGHT/2);
+	}
+
+	//Resets the game if R is pressed
+	if(restart){
+		clearInterval(intervalId);
+		init();
+	}
+}
+
+//Starts the game
+init();
+
+</script>
+
+</body>
+</html>
