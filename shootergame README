@@ -4,7 +4,7 @@ Thanks for playing my game! It was created in HTML 5 canvas and Javascript.
 Included is a library called Victor.js, which I did not write.
 
 Running the game:
-Open shootergame.html
+Open shootergame.html in your browser of choice. Most modern browsers will support the game.
 
 Rules:
 You get 3 lives. You lose a life upon touching an enemy.
@@ -32,6 +32,9 @@ var shipAbility = 2;
 1 is missile (The shot will penetrate enemies and give triple points)
 2 is shield (Your ship will not blow up on contact, enemies will)
 
-More features to come soon!
+Features to come:
 
-- Timothy Cameron, 8/13/2015
+Options Menu - Will have the ability to change the types of ship that you play as, instead of editing source.
+High Scores - Will allow you to track your high scores.
+
+- Timothy Cameron, 10/09/2015
